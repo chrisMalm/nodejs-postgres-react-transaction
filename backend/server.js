@@ -1,18 +1,34 @@
 const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-
-dotenv.config(); // Load environment variables from .env file
+const cors = require('cors')
+const { Pool } = require('pg');
 
 const app = express();
-app.use(cors()); // Enable CORS for cross-origin requests
-app.use(express.json()); // Enable JSON parsing
+const port = 5000;
+app.use(cors());
 
-app.get('/api', (req, res) => {
-  res.json({ message: 'Welcome to the backend!' });
+// PostgreSQL connection setup
+const pool = new Pool({
+  user: 'postgres', // your PostgreSQL username
+  host: 'localhost',
+  database: 'transactions', // your database name
+  password: '!12TreFyra', // your PostgreSQL password
+  port: 5432, // PostgreSQL port
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Route to get all transactions
+app.get('/transactions', async (req, res) => {
+  console.log('GET /transactions endpoint hit'); // Log when the endpoint is hit
+
+  try {
+    const result = await pool.query('SELECT * FROM transactions');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
 });
+
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
+
