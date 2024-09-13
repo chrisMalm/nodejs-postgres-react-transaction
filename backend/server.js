@@ -80,6 +80,28 @@ app.post('/login', async (req, res) => {
   }
 });
 
+// User transactions 
+app.get("/userTransacations/:id", async (req, res) => {
+  console.log("fetch all transactions for a user");
+  const { id } = req.params; // Extract user ID from the URL
+  console.log(id, "id från params");
+  
+  try {
+    const query = 'SELECT * FROM transactions WHERE user_id = $1'; // Assuming 'user_id' is the foreign key in the transactions table
+    const result = await pool.query(query, [id]);
+
+    // Check if transactions were found
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'No transactions found for this user' });
+    }
+
+    res.json(result.rows); // Send the transactions as a response
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+})
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

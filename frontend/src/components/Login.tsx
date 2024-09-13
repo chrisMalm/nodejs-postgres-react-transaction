@@ -11,7 +11,6 @@ import {
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthProvider ";
-// import {getUser} from "../api"
 
 export const LoginForm = () => {
     const { login, error} = useAuth();
@@ -19,7 +18,6 @@ export const LoginForm = () => {
     const [password, setPassword] = useState("");
     const [userNameError, setUserNameError] = useState("");
     const [passwordError, setPasswordError] = useState("");
-    // const [bkError, setBkError] = useState(false);
 
     const navigate = useNavigate();
 
