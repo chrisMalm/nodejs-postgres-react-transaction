@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Flex,
@@ -11,24 +11,33 @@ import {
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthProvider ";
+// import {getUser} from "../api"
 
 export const LoginForm = () => {
-    const { login } = useAuth();
-    const [email, setEmail] = useState("");
+    const { login, error} = useAuth();
+    const [userName, setUserName] = useState("");
     const [password, setPassword] = useState("");
-    const [emailError, setEmailError] = useState("");
+    const [userNameError, setUserNameError] = useState("");
     const [passwordError, setPasswordError] = useState("");
+    // const [bkError, setBkError] = useState(false);
+
     const navigate = useNavigate();
-    
-    const validateEmail = () => {
-      if (!email) {
-        setEmailError("Email is required");
-        return false;
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        setEmailError("Invalid email format");
+
+    useEffect(() => {
+        // Retrieve token from session storage on
+        //  if logged out it will return login
+        const storedToken = sessionStorage.getItem('authToken');
+        if (storedToken) {
+            navigate("/home")
+        }
+      }, [navigate]);
+
+    const validateUserName = () => {
+      if (!userName) {
+        setUserNameError("Username is required");
         return false;
       } else {
-        setEmailError("");
+        setUserNameError("");
         return true;
       }
     };
@@ -41,12 +50,12 @@ export const LoginForm = () => {
         return true;
       }
     };
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      if (validateEmail() && validatePassword()) {
-        console.log("Login successful");
-        login("dummyToken");
-        navigate("/home");
+      if (validateUserName() && validatePassword()) {
+        login(userName, password)
+        setPassword("")
+        setUserName("")
       }
     };
     return (
@@ -64,16 +73,18 @@ export const LoginForm = () => {
           </Box>
           <Box my={4} textAlign="left">
             <form onSubmit={handleSubmit}>
-              <FormControl isInvalid={!!emailError}>
-                <FormLabel>Email</FormLabel>
+              <FormControl isInvalid={!!userNameError}>
+                {!!error &&<FormErrorMessage>{error}</FormErrorMessage>
+            }
+                <FormLabel>Username</FormLabel>
                 <Input
-                  type="email"
-                  placeholder="john.doe@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onBlur={validateEmail}
+                  type="user"
+                  placeholder="john"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  onBlur={validateUserName}
                 />
-                <FormErrorMessage>{emailError}</FormErrorMessage>
+                <FormErrorMessage>{userNameError}</FormErrorMessage>
               </FormControl>
               <FormControl mt={6} isInvalid={!!passwordError}>
                 <FormLabel>Password</FormLabel>

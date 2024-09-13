@@ -1,11 +1,10 @@
-import React from "react";
 import { Box, Flex, Heading, Button } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthProvider ";
 
 export const Home = () => {
     const navigate = useNavigate();
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
     const handleSignOut = () => {
       console.log("User signed out");
       logout();
@@ -22,7 +21,7 @@ export const Home = () => {
           p={8}
         >
           <Box textAlign="center">
-            <Heading>Welcome to the Home Page!</Heading>
+            <Heading>Welcome, {user!.name}!</Heading>
           </Box>
           <Box my={4} textAlign="left">
             <p>This is a simple home page for your application.</p>
