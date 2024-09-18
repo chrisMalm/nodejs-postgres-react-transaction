@@ -67,17 +67,17 @@ export const Home = () => {
                 <ModalHeader>Transactions</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
-                  <Box boxShadow={'2xl'} mt={10} bg="gray.50" p={4}>
+                  <Box p={4}>
                     <Heading size={'md'} pb={4}>
-                      {`Successful ${
+                      {`Successfully ${
                         parseFloat(confirmedAmount || '0') < 0
                           ? 'Withdrawal'
                           : 'Deposit'
-                      }
+                      } of ${confirmedAmount}kr
              `}
                     </Heading>
                     <Heading pb={4} size={'sm'} color={'teal'}>
-                      Current Balance: {wiredT.balance}
+                      Current Balance: {wiredT.balance} kr
                     </Heading>
                     <Heading size={'sm'} color={'teal'}>
                       Wired Date: {wiredT.transaction_date}
