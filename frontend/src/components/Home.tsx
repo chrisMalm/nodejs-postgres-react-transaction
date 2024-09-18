@@ -1,5 +1,4 @@
 import { Box, Flex, Heading, Text } from '@chakra-ui/react'
-// import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthProvider '
 import { useEffect, useState } from 'react'
 import { getUserTransactions } from '../api'
@@ -9,9 +8,17 @@ interface ITransactions {
   amount: number
   transaction_date: string
 }
+
+export interface WiredTransaction {
+  balance: number | null
+  transaction_date: string
+}
 export const Home = () => {
   const [transactions, setTransactions] = useState<ITransactions[]>([])
-  // const navigate = useNavigate()
+  const [wiredT, setWiredT] = useState<WiredTransaction>({
+    balance: null,
+    transaction_date: '',
+  })
   const { user } = useAuth()
 
   useEffect(() => {
@@ -31,16 +38,29 @@ export const Home = () => {
     <>
       <Header username={user?.name} />
       <Flex className="BBB" minH={'100vh'} direction="row">
-        <Box m={'10rem'} w={'50%'}>
+        <Box my={'10rem'} mx={'5rem'} w={'50%'}>
           <Heading pb={4} size={'md'} textAlign={'center'}>
             {' '}
             Transactions Form
           </Heading>
-          <Form />
+          <Form userId={user?.id} setWiredT={setWiredT} />
+          {wiredT.balance && (
+            <Box boxShadow={'2xl'} mt={10} bg="gray.50" p={4}>
+              <Heading size={'md'} pb={4}>
+                Successfull deposition!
+              </Heading>
+              <Heading pb={4} size={'sm'} color={'teal'}>
+                Current Balance: {wiredT.balance}
+              </Heading>
+              <Heading size={'sm'} color={'teal'}>
+                Wired Date: {wiredT.transaction_date}
+              </Heading>
+            </Box>
+          )}
         </Box>
 
         {transactions.length > 0 ? (
-          <Box className="CCC" margin={'10rem'} w={'50%'}>
+          <Box className="CCC" my={'10rem'} mx={'5rem'} w={'50%'}>
             <Heading pb={4} size={'md'} textAlign={'center'}>
               {' '}
               Transactions History

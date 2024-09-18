@@ -19,21 +19,21 @@ export interface UserTransactions {
   transaction_date: string
 }
 
+// export interface WireUserTransaction {
+//   // Define the shape of the response data if needed
+//   amount: string
+//   userId?: string
+// }
+
+export interface UserTransaction {
+  // Define the shape of the response data if needed
+  balance: number
+  transaction_date: string
+}
+
 type Password = string
 type UserName = string
 type UserId = string | undefined
-
-export const getTransactions = async (): Promise<Transaction[]> => {
-  try {
-    const response = await axios.get<Transaction[]>(
-      `${API_BASE_URL}/transactions`
-    )
-    return response.data
-  } catch (error) {
-    console.error('Error fetching transactions:', error)
-    throw error
-  }
-}
 
 export const getUser = async (
   userName: UserName,
@@ -62,6 +62,26 @@ export const getUserTransactions = async (
     return response.data
   } catch (error) {
     console.error('Error fetching user transactions:', error)
+    throw error
+  }
+}
+
+export const wireTransaction = async (
+  amount: string,
+  userId: UserId
+): Promise<UserTransaction> => {
+  try {
+    const response = await axios.put<UserTransaction>(
+      `${API_BASE_URL}/userTransaction`,
+      {
+        amount,
+        userId,
+      }
+    )
+
+    return response.data
+  } catch (error) {
+    console.error('Error wiring transaction:', error)
     throw error
   }
 }

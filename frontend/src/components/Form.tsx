@@ -6,29 +6,45 @@ import {
   Input,
 } from '@chakra-ui/react'
 import React, { useState } from 'react'
+import { wireTransaction } from '../api'
+import { WiredTransaction } from './Home'
 
 type ErrorKeys = 'amount'
 
-export const Form = () => {
+interface FormProps {
+  userId?: string
+  setWiredT: (transaction: WiredTransaction) => void
+}
+
+export const Form = ({ userId, setWiredT }: FormProps) => {
   const [amount, setAmount] = useState<string>('')
   const [errors, setErrors] = useState<{ amount: string }>({ amount: '' })
   const [touched, setTouched] = useState<{ amount: boolean }>({ amount: false })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Form submitted with amount:', amount)
     handleValidation()
 
     // If there are no errors, process the form
     if (!errors.amount) {
-      console.log('Form submitted with amount:', amount)
+      const wiredTransaction = await wireTransaction(amount, userId)
+      const formattedDate = formatDate(wiredTransaction.transaction_date)
+      setWiredT({ ...wiredTransaction, transaction_date: formattedDate })
       setAmount('')
     }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('3')
-
     setAmount(e.target.value)
   }
 
@@ -37,13 +53,10 @@ export const Form = () => {
     setTouched({ amount: true })
 
     // Validate on blur
-    console.log('2')
 
     handleValidation()
   }
   const handleValidation = () => {
-    console.log('1')
-
     let newErrors = { ...errors }
     const numericAmount = Number(amount)
 
@@ -58,45 +71,41 @@ export const Form = () => {
     }
 
     setErrors(newErrors)
-    console.log('Validation errors:', newErrors) // Debug log
   }
 
   const isFieldInvalid = (fieldName: ErrorKeys) => {
-    console.log('4')
-
     return !!errors[fieldName]
   }
   const isButtonDisabled = () => {
-    console.log('5')
-
     const shouldDisable = isFieldInvalid('amount') || amount === '0'
-    console.log('Button disabled:', shouldDisable) // Debug log
     return shouldDisable
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <FormControl isInvalid={isFieldInvalid('amount')} isRequired>
-        <FormLabel>Amount</FormLabel>
-        <Input
-          type="number"
-          placeholder="Amount"
-          onChange={handleChange}
-          value={amount}
-          onBlur={handleBlur} // Validate on blur if needed
-        />
-        {touched.amount && errors.amount && (
-          <FormErrorMessage>{errors.amount}</FormErrorMessage>
-        )}
-      </FormControl>
-      <Button
-        mt={4}
-        colorScheme="teal"
-        type="submit"
-        isDisabled={isButtonDisabled()}
-      >
-        Submit
-      </Button>
-    </form>
+    <>
+      <form onSubmit={handleSubmit}>
+        <FormControl isInvalid={isFieldInvalid('amount')} isRequired>
+          <FormLabel>Amount</FormLabel>
+          <Input
+            type="number"
+            placeholder="Amount"
+            onChange={handleChange}
+            value={amount}
+            onBlur={handleBlur} // Validate on blur if needed
+          />
+          {touched.amount && errors.amount && (
+            <FormErrorMessage>{errors.amount}</FormErrorMessage>
+          )}
+        </FormControl>
+        <Button
+          mt={4}
+          colorScheme="teal"
+          type="submit"
+          isDisabled={isButtonDisabled()}
+        >
+          Submit
+        </Button>
+      </form>
+    </>
   )
 }
