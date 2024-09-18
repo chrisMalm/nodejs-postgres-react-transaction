@@ -19,12 +19,6 @@ export interface UserTransactions {
   transaction_date: string
 }
 
-// export interface WireUserTransaction {
-//   // Define the shape of the response data if needed
-//   amount: string
-//   userId?: string
-// }
-
 export interface UserTransaction {
   // Define the shape of the response data if needed
   balance: number

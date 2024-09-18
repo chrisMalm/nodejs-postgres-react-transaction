@@ -7,40 +7,32 @@ import {
 } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import { wireTransaction } from '../api'
-import { WiredTransaction } from './Home'
+import { FormProps, ErrorKeys } from '../types/formTypes'
+import { formatDate } from '../utils/dateUtils'
 
-type ErrorKeys = 'amount'
-
-interface FormProps {
-  userId?: string
-  setWiredT: (transaction: WiredTransaction) => void
-}
-
-export const Form = ({ userId, setWiredT }: FormProps) => {
-  const [amount, setAmount] = useState<string>('')
+export const Form = ({
+  userId,
+  setWiredT,
+  amount,
+  setAmount,
+  setConfirmedAmount,
+  onOpen,
+}: FormProps) => {
   const [errors, setErrors] = useState<{ amount: string }>({ amount: '' })
   const [touched, setTouched] = useState<{ amount: boolean }>({ amount: false })
-
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     handleValidation()
 
     // If there are no errors, process the form
-    if (!errors.amount) {
+    if (!errors.amount && amount) {
       const wiredTransaction = await wireTransaction(amount, userId)
       const formattedDate = formatDate(wiredTransaction.transaction_date)
       setWiredT({ ...wiredTransaction, transaction_date: formattedDate })
+      setConfirmedAmount(amount)
       setAmount('')
+      onOpen()
     }
   }
 
@@ -64,8 +56,8 @@ export const Form = ({ userId, setWiredT }: FormProps) => {
       newErrors.amount = 'Amount is required'
     } else if (isNaN(numericAmount)) {
       newErrors.amount = 'Amount must be a number'
-    } else if (numericAmount <= 0) {
-      newErrors.amount = 'Amount must be greater than 0'
+    } else if (numericAmount === 0) {
+      newErrors.amount = 'Amountcant be 0'
     } else {
       newErrors.amount = ''
     }
