@@ -71,8 +71,12 @@ app.get('/userTransacations/:id', async (req, res) => {
         .status(404)
         .json({ message: 'No transactions found for this user' })
     }
+    // sort array of transactions ond reverse
+    const sortedArray = result.rows
+      .sort((a, b) => a.transaction_date - b.transaction_date)
+      .reverse()
 
-    res.json(result.rows) // Send the transactions as a response
+    res.json(sortedArray) // Send the transactions as a response
   } catch (err) {
     console.error(err.message)
     res.status(500).send('Server error')
@@ -126,6 +130,26 @@ app.put('/userTransaction', async (req, res) => {
     })
   } catch (err) {
     console.error('Error processing transaction:', err.message)
+    res.status(500).send('Server error')
+  }
+})
+
+app.get('/userBalance/:id', async (req, res) => {
+  const { id } = req.params
+
+  try {
+    const accountQuery = 'SELECT * FROM bank_balances WHERE user_id = $1'
+    const result = await pool.query(accountQuery, [id])
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ message: 'No user account found for this user' })
+    }
+    const { balance } = result.rows[0] // Extracting balance
+
+    res.json({ balance }) // Sending only the balance
+  } catch (err) {
+    console.error('Error processing Balance:', err.message)
     res.status(500).send('Server error')
   }
 })

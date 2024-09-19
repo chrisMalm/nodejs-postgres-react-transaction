@@ -13,14 +13,16 @@ import {
 } from '@chakra-ui/react'
 import { useAuth } from '../contexts/AuthProvider '
 import { useEffect, useState } from 'react'
-import { getUserTransactions } from '../api'
+import { getBalance, getUserTransactions } from '../api'
 import { Header } from '../components/HeaderComponent'
 import { Form } from '../components/FormComponent'
 import { WiredTransaction, ITransactions } from '../types/transactionTypes'
+import { BalanceComponent } from '../components/BalanceComponent'
 
 export const Home = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [confirmedAmount, setConfirmedAmount] = useState<string | null>(null) // This will hold the submitted amount
+  const [bankBalance, setBankBalance] = useState<string | ''>('')
   const [amount, setAmount] = useState<string>('')
   const [transactions, setTransactions] = useState<ITransactions[]>([])
   const [wiredT, setWiredT] = useState<WiredTransaction>({
@@ -28,6 +30,19 @@ export const Home = () => {
     transaction_date: '',
   })
   const { user } = useAuth()
+
+  useEffect(() => {
+    const userId = user?.id
+    if (userId) {
+      getBalance(userId)
+        .then((bank) => {
+          setBankBalance(bank.balance)
+        })
+        .catch((error) => {
+          console.error('Error fetching bank balance:', error)
+        })
+    }
+  }, [user?.id, confirmedAmount])
 
   useEffect(() => {
     const userId = user?.id
@@ -40,11 +55,12 @@ export const Home = () => {
           console.error('Error fetching user transactions:', error)
         })
     }
-  }, [user?.id])
+  }, [user?.id, confirmedAmount])
 
   return (
     <>
       <Header username={user?.name} />
+      <BalanceComponent balance={bankBalance} />
       <Flex className="BBB" minH={'100vh'} direction="row">
         <Box my={'10rem'} mx={'5rem'} w={'50%'}>
           <Heading pb={4} size={'md'} textAlign={'center'}>
@@ -96,9 +112,21 @@ export const Home = () => {
               Transactions History
             </Heading>
             {transactions.map((transaction, index) => (
-              <Box key={index} boxShadow="2xl" rounded={'lg'} p={3} m={4}>
+              <Box
+                key={index}
+                boxShadow="2xl"
+                rounded={'lg'}
+                p={3}
+                m={4}
+                bg={index === 0 ? 'teal.100' : 'white'}
+              >
+                {index === 0 && <Heading size={'md'}>Last transaction</Heading>}
                 <Heading p={'2'} size={'sm'}>
-                  Amount: {transaction.amount}
+                  Amount{' '}
+                  {transaction.amount < 0
+                    ? `Withdrawal ${transaction.amount}`
+                    : `Deposit ${transaction.amount}`}{' '}
+                  kr
                 </Heading>
                 <Heading p={'2'} size={'xs'}>
                   Date:{' '}

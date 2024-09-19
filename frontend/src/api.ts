@@ -25,6 +25,11 @@ export interface UserTransaction {
   transaction_date: string
 }
 
+export interface UserBalance {
+  // Define the shape of the response data if needed
+  balance: string
+}
+
 type Password = string
 type UserName = string
 type UserId = string | undefined
@@ -76,6 +81,19 @@ export const wireTransaction = async (
     return response.data
   } catch (error) {
     console.error('Error wiring transaction:', error)
+    throw error
+  }
+}
+
+export const getBalance = async (userId: UserId): Promise<UserBalance> => {
+  try {
+    const response = await axios.get<UserBalance>(
+      `${API_BASE_URL}/userBalance/${userId}`
+    )
+
+    return response.data
+  } catch (error) {
+    console.error('Error getting balance:', error)
     throw error
   }
 }
